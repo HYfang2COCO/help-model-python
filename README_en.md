@@ -53,7 +53,7 @@ Available options include SCS Curve Number runoff, moisture-adjusted CN, modifie
 
 - [English interface guide](docs/UI_GUIDE_en.md)
 - [French interface guide](docs/UI_GUIDE_fr.md)
-- [Web guide](docs/WEB_GUIDE.md) and [method details](docs/V22_METHODS.md) — detailed notes are in Chinese.
+- [Web guide](docs/WEB_GUIDE.md) — Chinese; [method details](docs/V22_METHODS.md) — English.
 - Additional documentation, JSON templates, example profiles and tests are included in the ZIP.
 
 From the **extracted project folder**, run:

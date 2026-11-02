@@ -1,51 +1,51 @@
-# v2.2 新功能及公式核对
+# v2.2 Features and Equation-Level Checks
 
-## 层的单击操作
+## Selecting and editing layers
 
-在层表任意单元格单击即可选择对应层，整行以蓝色标记。上移、下移、删除和下方参数编辑均针对当前层。移动后用稳定 id 跟踪选择，不把同一行号误当原来的层。下拉选择器作为键盘操作的补充入口。
+Click any cell in the layer table to select that layer; the entire row is highlighted in blue. Move up, move down, delete, and the parameter editor below the table all act on the selected layer. After reordering, selection follows the layer's stable ID rather than treating the same row number as the original layer. A drop-down selector provides an additional option for keyboard navigation.
 
-## 降水信息导入
+## Importing precipitation data
 
-“运行与结果”支持 CSV、TSV、XLSX，也可直接粘贴 CSV。首行为列名，Excel 可选工作表。可映射中/英/法列名，选择日期格式、mm/cm/inch，预览归一化后的日数据。缺日、重复、负降水、空值和非有限值会被拒绝，不自动补日、不自动把月值或小时值当日值。
+The **Run and results** view supports CSV, TSV, and XLSX files, as well as pasted CSV text. The first row must contain column names; for Excel files, the worksheet can be selected. Users can map Chinese, English, or French column names, choose the date format and precipitation units (mm, cm, or inches), and preview the normalized daily data. Missing days, duplicate dates, negative precipitation, missing values, and non-finite values are rejected. The importer does not automatically fill missing days or treat monthly or hourly values as daily values.
 
-仅有日期及降水时，用户须查看并设置缺少的日气温和日 PET 常数。它们是明确的情景假设，不是从降水推算的观测值。若需要 Modified Penman，应提供太阳辐射（MJ/m²/day）、相对湿度（0～100%）、2m风速（m/s）及气温。常数 PET 和 PET 列在此模式不用于计算。
+When only dates and precipitation are available, users must review and set constants for the missing daily air temperature and daily potential evapotranspiration (PET). These are explicit scenario assumptions, not observations inferred from precipitation. **Modified Penman** requires solar radiation (MJ/m²/day), relative humidity (0–100%), wind speed at 2 m (m/s), and air temperature. The constant PET setting and the PET input column are not used to calculate PET in this mode.
 
-结果包新增 `input_provenance.json`，记录列映射、单位和使用的常数。归一化气象保存在 `weather.csv`。更改气象输入或剖面后，上次结果会提示重新运行。
+The results package includes `input_provenance.json`, which records column mappings, units, and any constants used. Normalized weather data are saved in `weather.csv`. After the weather inputs or profile change, the previous results are marked as requiring a new simulation.
 
-## 公式级实现范围
+## Scope of equation-level implementation
 
-原始资料：[USACE 发布的 HELP v3 Engineering Documentation](https://dots.el.erdc.dren.mil/elmodels/pdf/help3doc.pdf)，EPA/600/R-94/168b；同时核对 [EPA HELP 4 手册](https://www.epa.gov/land-research/help-40-user-manual)。以下页码是文件印刷页码。
+Source documentation: [HELP v3 Engineering Documentation hosted by USACE](https://dots.el.erdc.dren.mil/elmodels/pdf/help3doc.pdf), EPA/600/R-94/168b, with additional cross-checks against the [EPA HELP 4 User Manual](https://www.epa.gov/land-research/help-40-user-manual). Page references use the documents' printed page numbers.
 
-| 模块 | v2.2可选计算 | 尚未复现的部分 |
+| Component | Optional calculation in v2.2 | Parts not fully reproduced |
 |---|---|---|
-| Runoff | 输入CN-II；输入CN-II加坡度；植被等级+IR生成CN再加坡度。逐日含水率修正采用式26～32及34，最终用SCS径流式 | 无冻土状态预测；IR由用户输入，未建立官方默认材料完整数据库 |
-| PET | Modified Penman式47、54～63，辐射与空气动力项；MJ/m²→langley，m/s→km/h，输出mm/day | 使用逐日RH/风代替官方季度/年均值；极区及辐射云量比作数值边界处理；无完整雪能量交换 |
-| 实际ET | 原有根区法，或季节LAI分配的蒸发/蒸腾两项，各受可用储水限制 | LAI用用户生长季的半正弦变化；分配用exp(-0.5LAI)，并非完整Ritchie/HELP植被与两阶段蒸发模型 |
-| 非饱和垂向 | 保留Brooks-Corey/Campbell形式的K(theta)及有限容量层间转移 | WP仍作残余水代理；未复现官方残余水/孔径指数推定及完整分段非线性求解 |
-| 侧向排水 | 新增HELP式178/180，采用数值反解得到流率；水平层使用式179极限 | h仍取本层等效饱和深度；无多层饱和区加权与完整水头—渗漏联合迭代 |
-| Barrier | 饱和Darcy型流率，容量与可排水量限制 | 仍为局部水头储水桶，非完整承压场 |
-| Geomembrane | 良好/较差接触的Giroud半径公式162/165，结合式151/152；输入针孔和安装缺陷密度及面积 | 仅膜正下方直接接低渗barrier；无全部六种设计情况、自由孔流/土工布接触和完整蒸汽扩散模块 |
+| Runoff | Three options: enter CN-II directly; enter CN-II and apply a slope adjustment; or derive CN from vegetation class and IR, then apply the slope adjustment. Daily moisture adjustments use Equations 26–32 and 34, followed by the SCS runoff equation. | No prediction of frozen-soil conditions. IR is supplied by the user; a complete database of the official default materials has not been implemented. |
+| PET | Modified Penman Equations 47 and 54–63, including radiation and aerodynamic terms. Units are converted from MJ/m² to langleys and from m/s to km/h; output is in mm/day. | Daily relative humidity and wind replace the official quarterly/annual averages. Numerical bounds are applied to polar conditions and the radiation/cloud-cover ratio. Full snow energy exchange is not implemented. |
+| Actual ET | The existing root-zone method, or separate evaporation and transpiration components partitioned using seasonal LAI; both are limited by available water storage. | LAI follows a half-sine curve over the user-defined growing season. Partitioning uses `exp(-0.5LAI)`; this is not the complete Ritchie/HELP vegetation and two-stage evaporation model. |
+| Unsaturated vertical flow | Retains the Brooks–Corey/Campbell form of `K(theta)` and transfers between layers with finite storage capacity. | The wilting point (WP) remains a proxy for residual water content. The official estimation of residual water content and pore-size index, and the complete piecewise nonlinear solution, are not reproduced. |
+| Lateral drainage | Adds HELP Equations 178 and 180, solved numerically for the flow rate. Horizontal layers use the limiting form in Equation 179. | `h` remains the equivalent saturated depth within the current layer. Multilayer saturated-zone weighting and the complete coupled head–leakage iteration are not implemented. |
+| Barrier soil | A saturated Darcy-type flow rate, limited by capacity and the amount of drainable water. | Still uses a local-head storage bucket, rather than a complete confined hydraulic-head field. |
+| Geomembrane | Giroud wetted-radius Equations 162 and 165 for good/poor contact, combined with Equations 151 and 152. Inputs include densities and areas of pinholes and installation defects. | Applies only when the membrane is directly above a low-permeability barrier layer. All six design cases, free flow through holes, geotextile contact, and the complete vapor-diffusion module are not implemented. |
 
-完整程序仍是独立求解器。核对并实现某一公式不意味着整个模型与EPA HELP等效，缺陷经验公式也不能称为“精确实测泄漏”。没有官方逐日基准输出对比。
+The overall program remains an independent solver. Checking and implementing an individual equation does not establish equivalence of the entire model to EPA HELP. Empirical defect-leakage formulas must not be described as precise measurements of actual leakage. No comparison against official daily benchmark outputs has been completed.
 
-## 数值及参数细节
+## Numerical and parameter details
 
-### CN与地表
+### Curve Number and surface conditions
 
-旧固定CN模式保留，以便复算旧配置。三种新模式中的CN指AMC-II，日CN根据现有均匀层的储水投影到七个深度段计算，段边界比例为1/36、1/6、1/3、1/2、2/3、5/6、1；权重采用式29并归一化。此投影不增加隐藏含水状态。遇到膜或barrier停止蒸发区。
+The original fixed-CN mode is retained so that earlier configurations can be rerun. In the three new modes, the input CN refers to antecedent moisture condition II (AMC-II). The daily CN is calculated by projecting water storage from the existing homogeneous layers onto seven depth intervals. Their boundary fractions are `1/36, 1/6, 1/3, 1/2, 2/3, 5/6, 1`; weights follow Equation 29 and are normalized. This projection does not introduce hidden moisture states. The evaporation zone ends at the first geomembrane or barrier layer.
 
-坡度式34中长度按500ft、坡度按0.04标准化。原文回归样本坡度0.04～0.5、坡长50～500ft；范围外是外推，需自行评估。植被式32使用Table7系数。IR不是Ks，不会从导水率自动生成；示例IR为演示输入。数值CN限在0.01～99.99，完全饱和时日CN可到100。
+In slope Equation 34, length is normalized to 500 ft and slope to 0.04. The original regression data covered slopes of 0.04–0.5 and slope lengths of 50–500 ft. Values outside those ranges are extrapolations and require separate assessment. Vegetation Equation 32 uses the coefficients in Table 7. **IR is not Ks** and is not generated automatically from hydraulic conductivity; example IR values are illustrative inputs. Numerical CN values are bounded between 0.01 and 99.99, although the daily CN can reach 100 at full saturation.
 
-### PET与ET
+### PET and actual ET
 
-Penman参数与导入天气均入账，降水日按原说明取RH=1。气象辐射/湿度/风必须有数据，不因选择方法自动从降水生成。随包 `weather_energy_synthetic.csv` 的全部数据是合成演示值。
+Penman parameters and imported weather inputs are recorded. On precipitation days, RH is set to 1, following the source documentation. Radiation, humidity, and wind data must be supplied; selecting the method does not generate them from precipitation. All values in the supplied [`weather_energy_synthetic.csv`](../examples/weather_energy_synthetic.csv) are synthetic demonstration data.
 
-季节LAI只改变PET在土壤蒸发和植被蒸腾之间的分配，不凭空产生水。两个实际通量加上雪升华不会超过PET。旧根区法没有可区分的两项输出，对应CSV列为空，避免把未拆分量写成零。
+Seasonal LAI changes only the partitioning of PET between soil evaporation and vegetation transpiration; it does not create water. The two actual fluxes plus snow sublimation cannot exceed PET. The original root-zone method does not provide separate evaporation and transpiration outputs, so the corresponding CSV cells are left blank instead of recording an unresolved component as zero.
 
-### 侧向流及膜
+### Lateral flow and geomembranes
 
-式180使用对数形式评估幂项并二分反解，保持在临界值处连续。公式178/180的h-L关系与局部储水桶的耦合仍依赖子步数。
+Equation 180 evaluates power terms in logarithmic form and is inverted by bisection, maintaining continuity at the critical value. Coupling the `h–L` relationship in Equations 178 and 180 to the local storage bucket still depends on the number of substeps.
 
-Giroud接触模式要求膜紧邻下方barrier，且barrier Ks<86.4mm/day（1e-4cm/s）。缺陷密度以个/ha输入、面积以mm²输入，转SI后算界面润湿半径与平均梯度；应用0.00100/0.00114黏度修正。润湿面积比例限定不超过1，合计泄漏不超过下方土的Darcy通量。半径接近孔半径时用直接孔面积的Darcy边界值。此处理与任意孔面积扩展均须基准验证。
+The Giroud contact mode requires a barrier layer immediately below the membrane, with **barrier Ks < 86.4 mm/day (1e-4 cm/s)**. Defect density is entered as defects/ha and defect area as mm². After conversion to SI units, the model calculates the interface wetted radius and average gradient, applying the viscosity correction `0.00100/0.00114`. The wetted-area fraction is capped at 1, and total leakage cannot exceed the Darcy flux through the underlying soil. As the wetted radius approaches the hole radius, the model uses the Darcy limiting value based directly on the hole area. This treatment, including its extension to arbitrary hole areas, requires benchmark validation.
 
-膜完整部分仍通过输入等效Ks近似；Giroud模式不使用旧经验倍率。旧配置自动继续使用经验倍率模式，避免未经用户选择就改动历史计算。科学公式例子见 `examples/advanced_methods.json`。
+The intact portion of the membrane is still approximated using the input equivalent Ks. Giroud mode does not use the original empirical multiplier. Earlier configurations automatically retain the empirical-multiplier mode so that historical calculations are not changed without the user's selection. An example of the equation-based options is provided in [`examples/advanced_methods.json`](../examples/advanced_methods.json).

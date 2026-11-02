@@ -55,7 +55,7 @@ Available options include SCS Curve Number runoff, moisture-adjusted CN, modifie
 
 - [English interface guide](docs/UI_GUIDE_en.md)
 - [French interface guide](docs/UI_GUIDE_fr.md)
-- [Web guide](docs/WEB_GUIDE.md) and [method details](docs/V22_METHODS.md) — detailed notes are in Chinese.
+- [Web guide](docs/WEB_GUIDE.md) — Chinese; [method details](docs/V22_METHODS.md) — English.
 - Additional documentation, JSON templates, example profiles and tests are included in the ZIP.
 
 From the **extracted project folder**, run:
@@ -122,7 +122,7 @@ Les options comprennent le ruissellement par Curve Number SCS, un CN ajusté à 
 
 - [Guide de l’interface en français](docs/UI_GUIDE_fr.md)
 - [Guide de l’interface en anglais](docs/UI_GUIDE_en.md)
-- [Guide web](docs/WEB_GUIDE.md) et [détails méthodologiques](docs/V22_METHODS.md) — les notes détaillées sont en chinois.
+- [Guide web](docs/WEB_GUIDE.md) — en chinois ; [détails méthodologiques](docs/V22_METHODS.md) — en anglais.
 - Le ZIP contient d’autres documents, des modèles JSON, des profils d’exemple et les tests.
 
 Depuis le **dossier du projet décompressé**, exécutez :
