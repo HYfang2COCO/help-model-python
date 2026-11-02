@@ -1,56 +1,66 @@
-# HELP — Bilan hydrique multicouche, v2.3.1
+# HELP — Bilan hydrique des décharges
 
-Les graphiques proposent les dates de début et de fin, toute la période, les 30/90/365 derniers jours et un affichage par jour/mois/année. Les deux dates sont incluses ; les raccourcis se terminent au dernier jour simulé. Les totaux mensuels et annuels additionnent seulement les jours sélectionnés, sans extrapoler les périodes incomplètes. Le tableau quotidien suit la période ; les totaux et le ZIP conservent la simulation complète. Le choix est conservé au changement de langue et réinitialisé après une nouvelle simulation.
+[English](README_en.md) · [Français](README_fr.md) · [Présentation bilingue](README.md)
 
-Le dossier contient maintenant une interface principale HTML complète : **`index.html`**. Elle permet de sélectionner les couches, les ajouter/supprimer/déplacer, modifier les paramètres, importer/exporter JSON, importer CSV/TSV ou coller la météo, simuler et télécharger les résultats.
+### Présentation
 
-**Décompressez tout le ZIP puis lancez `Start_Web.cmd`.** Python 3.10+ est nécessaire ; seule sa bibliothèque standard est utilisée, sans installation de Streamlit. Le navigateur s’ouvre automatiquement. La langue initiale est **English**, puis **Français**, puis **中文** dans le sélecteur ; les choix suivants sont mémorisés par l’interface web.
+Un modèle Python indépendant inspiré du fonctionnement de **HELP (Hydrologic Evaluation of Landfill Performance)**. Il simule quotidiennement le stockage et les transferts d’eau dans un profil de décharge configurable, avec une interface web locale en **anglais, français et chinois**.
 
-Ouvrir directement `index.html` permet l’édition hors ligne, l’aperçu météo et l’export JSON. Pour calculer, utilisez la page locale ouverte par `Start_Web.cmd`. Toutes les ressources sont fournies ; conservez le dossier `web/` à côté de `index.html`. Excel peut être enregistré en CSV ou importé via l’interface Streamlit conservée.
+### Téléchargement et démarrage
 
-L’aide web est trilingue. Le workflow et les contrôles sont décrits dans `docs/WEB_GUIDE.md` (chinois) et `docs/WEB_TEST_REPORT.md`. L’interface Streamlit reste optionnelle et utilise le même moteur Python et les mêmes formules v2.2. Ses instructions suivent.
+**[Télécharger l’application complète au format ZIP](HELP_Model_Python_v2_3_2.zip)**
 
-Cliquez sur une cellule pour sélectionner sa couche, puis déplacez, supprimez ou modifiez-la. L’importation accepte CSV/TSV/XLSX, le choix de feuille et de colonnes, les unités, un aperçu et du CSV collé. Les précipitations seules utilisent des constantes de température/ETP explicitement affichées. Penman modifié nécessite le rayonnement, l’humidité et le vent à 2 m.
+1. Installez **Python 3.10 ou une version ultérieure**.
+2. Téléchargez le ZIP ci-dessus et décompressez **tout** son contenu.
+3. Sous Windows, double-cliquez sur `Start_Web.cmd` dans le dossier du projet décompressé.
+4. L’interface web locale s’ouvre dans votre navigateur. La langue initiale est l’anglais ; le sélecteur **Langue** permet de choisir le français ou le chinois.
 
-Les méthodes optionnelles ajoutent le CN corrigé quotidiennement, l’ETP de Penman modifiée, les équations HELP de drainage permanent et les formules de défauts de Giroud pour bon/mauvais contact. La répartition de l’ET réelle selon un LAI saisonnier reste approximative. Ces modules ne constituent pas une reproduction complète d’EPA HELP. Conditions et sources : `docs/V22_METHODS.md` (chinois).
+L’interface web fournie et le moteur de calcul utilisent la bibliothèque standard de Python ; Streamlit est facultatif. Sur les autres systèmes, exécutez cette commande depuis le dossier du projet décompressé :
 
-L’interface est disponible en chinois, français et anglais. Choisissez la langue dans la barre latérale ou utilisez `Start_UI_ZH.cmd`, `Start_UI_FR.cmd` ou `Start_UI_EN.cmd`. Le petit sous-titre et l’avis jaune placés auparavant sous le titre ont été retirés. Les méthodes restent décrites dans l’onglet d’aide et les documents techniques.
-
-## Démarrage
-
-Python 3.10 ou une version ultérieure est requis. Sous Windows, double-cliquez sur le lanceur de votre langue. Au premier démarrage, un environnement virtuel est créé dans le projet et Streamlit est installé depuis PyPI. Vous pouvez aussi exécuter :
-
-```powershell
-python -m venv .venv
-.venv\Scripts\python -m pip install -r requirements-ui.txt
-.venv\Scripts\python -m streamlit run app.py --server.address 127.0.0.1 --browser.gatherUsageStats false
+```bash
+python web_server.py --open
 ```
 
-## Configuration et simulation
+Utilisez le ZIP complet pour obtenir une installation exécutable. Il conserve les dossiers nécessaires `web/`, `examples/`, `docs/` et `tests/`. Les fichiers séparés actuellement visibles dans ce dépôt ont été téléversés sans cette arborescence. L’ouverture directe de `index.html` permet l’édition et les aperçus ; les calculs nécessitent le serveur Python local.
 
-1. Chargez l’un des cinq profils d’exemple ou importez un fichier JSON.
-2. Ajoutez des couches de sol, déchets, drainage, barrière en sol ou géomembrane. Sélectionnez une couche pour la modifier, la déplacer ou la supprimer.
-3. Définissez l’épaisseur, la conductivité et les paramètres de stockage ou de drainage applicables. Enregistrez la couche.
-4. Enregistrez les paramètres généraux et la cible de recirculation. Les identifiants restent stables lors du réordonnancement.
-5. Importez une météo quotidienne consécutive (`date,precip_mm,temp_c,pet_mm`) ou utilisez les deux années synthétiques fournies.
-6. Lancez la simulation et téléchargez les résultats ZIP.
+### Fonctionnalités
 
-Changer de langue conserve la configuration enregistrée et les résultats précédents. Enregistrez les modifications du formulaire avant de changer de langue. Les clés JSON/CSV, identifiants et noms saisis restent inchangés pour assurer la compatibilité des fichiers.
+- Sélection d’une couche par un clic, puis ajout, modification, déplacement vers le haut/bas ou suppression.
+- Configuration de couches de sol, de déchets, de drainage, de barrière en sol et de géomembrane, avec identifiants stables et champs adaptés à chaque type.
+- Réglage de l’épaisseur, de la conductivité hydraulique et, selon le type, de la porosité, de la capacité au champ, du point de flétrissement, de l’humidité initiale et des paramètres de drainage.
+- Importation/exportation de profils JSON ; importation météo CSV/TSV ou collage de précipitations. L’interface Streamlit facultative accepte aussi les fichiers Excel.
+- Suivi du ruissellement, de l’évapotranspiration, du stockage par couche, des transferts verticaux, de la collecte indépendante des drainages, de la recirculation et de la sortie à la base.
+- Choix des dates de début/fin et d’un affichage journalier, mensuel ou annuel, avec noms des axes et unités.
+- Exportation des bilans, des résultats par couche, des données d’entrée et de la configuration.
 
-## Résultats
+### Données d’entrée et résultats
 
-Le ZIP contient la configuration et la météo utilisées, les bilans quotidiens/mensuels/annuels, les flux et stocks par couche, ainsi qu’un résumé. Les quantités d’eau sont des lames d’eau sur la superficie du site. `m³ = mm × area_m2 / 1000`.
+Les données météo quotidiennes utilisent `date,precip_mm,temp_c,pet_mm`, avec des dates ISO consécutives (`YYYY-MM-DD`). L’interface facilite la correspondance des colonnes et des unités. Des données limitées aux précipitations nécessitent des hypothèses explicites pour la température et l’évapotranspiration potentielle manquantes.
 
-Chaque couche drainante contribue indépendamment à la collecte. Le flux à travers un revêtement intermédiaire est un transfert interne ; seul le flux franchissant la base est une sortie inférieure du système. `liner_leakage_mm` est un alias de `bottom_leakage_mm`, et non une sortie supplémentaire. L’eau en attente de recirculation reste dans le stockage.
+Les quantités d’eau sont exprimées en lame d’eau équivalente sur la superficie du site, en millimètres. Les flux journaliers sont affichés en **mm/jour** ; les cumuls mensuels et annuels sont en **mm**. Les vues mensuelles/annuelles additionnent les quantités des jours sélectionnés : leurs valeurs et leurs échelles verticales automatiques diffèrent donc de la vue journalière. Les périodes incomplètes comprennent uniquement les jours sélectionnés.
 
-Bilan journalier : stockage initial + précipitation = stockage final + ruissellement + ET + collecte nette + sortie à la base. Le bilan de chaque couche est également vérifié. Un résidu supérieur à 1e-7 mm arrête le calcul.
+Conversion en volume : `m³ = mm × area_m2 / 1000`.
 
-## Méthodes
+Le moteur vérifie le bilan quotidien du système et celui de chaque couche. L’eau en attente de recirculation le lendemain reste incluse dans le stockage.
 
-Il s’agit d’un modèle de recherche approximatif indépendant, dérivé du MVP Python initial. Son équivalence à EPA HELP et sa précision par rapport aux mesures de terrain n’ont pas été validées. Il utilise un CN fixe, une fonte par degrés-jours, une ETP externe, des réservoirs de stockage, une charge locale simplifiée, un drainage de type Darcy et une limitation empirique des fuites de membrane. Un bilan fermé ne prouve pas la précision physique. Les défauts de membrane, le contact membrane-sol, le gel du sol et la croissance végétale ne sont pas résolus.
+### Méthodes et portée
 
-Consultez `docs/UI_GUIDE_fr.md`, `TECHNICAL_NOTES.md` et `docs/TEST_REPORT.md`. Les notes techniques détaillées et le rapport de tests sont en chinois. Le dossier `legacy/` conserve le code et les documents d’origine.
+Les options comprennent le ruissellement par Curve Number SCS, un CN ajusté à l’humidité, l’évapotranspiration potentielle de Penman modifiée, un écoulement non saturé simplifié, le drainage latéral et des formules de fuite par défauts de géomembrane. Les hypothèses et les données nécessaires figurent dans [les notes méthodologiques](V22_METHODS.md).
 
-Les cinq profils illustrent le drainage sans revêtement, un revêtement composite inférieur, un double revêtement, des drainages de couverture et de base distincts et la recirculation. Les paramètres et la météo ne sont pas des mesures de site. `examples/config.schema.json` décrit le format JSON commun.
+**Il s’agit d’une approximation indépendante, et non du logiciel officiel EPA HELP.** L’équivalence numérique complète à EPA HELP et la précision par rapport aux mesures de terrain n’ont pas été établies. Un bilan hydrique fermé vérifie la cohérence comptable, pas la précision prédictive. Les profils et les données météo d’exemple sont synthétiques et illustratifs.
 
-Les deux axes sont nommés. L’axe X indique la date, le mois ou l’année ; l’axe Y indique la variable et son unité : mm/day pour les valeurs quotidiennes, mm pour les totaux mensuels/annuels.
+### Documentation et vérifications
+
+- [Guide de l’interface en français](UI_GUIDE_fr.md)
+- [Guide de l’interface en anglais](UI_GUIDE_en.md)
+- [Guide web](WEB_GUIDE.md) et [détails méthodologiques](V22_METHODS.md) — les notes détaillées sont en chinois.
+- Le ZIP contient d’autres documents, des modèles JSON, des profils d’exemple et les tests.
+
+Depuis le **dossier du projet décompressé**, exécutez :
+
+```bash
+python -m unittest discover -s tests -v
+node --test tests/test_time_series.cjs
+```
+
+Node.js sert uniquement aux vérifications JavaScript. Les contrôles Python facultatifs de l’interface et du schéma nécessitent les dépendances correspondantes.

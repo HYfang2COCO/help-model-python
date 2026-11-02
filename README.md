@@ -1,115 +1,135 @@
-# HELP-inspired Landfill Hydrology Model — Python Research MVP
+# HELP — Landfill Water Balance / Bilan hydrique des décharges
 
-**Status:** A standalone daily water-balance simulator **inspired by** the US EPA Hydrologic Evaluation of Landfill Performance (HELP) model. **It is NOT the official HELP model, does NOT reproduce every HELP 3/4 equation, and has NOT been calibrated or validated against HELP output or field measurements.** Do not use its numbers for landfill design, environmental permitting, compliance claims, or risk certification.
+[English](#english) · [Français](#français)
 
-## 中文概览
+## English
 
-本项目复刻 HELP 的主要工作流程，而不是声称复制了官方程序的计算结果：逐日气象 → 雨雪划分/融雪 → SCS 曲线数径流 → 分层蒸散 → 非饱和垂向入渗 → 侧向排水与底部泄漏 → 日/月/年水量平衡。
+### Overview
 
-只需 Python 3.10+，运行不依赖第三方库。制图需要 `matplotlib`。
+An independent Python model inspired by the **Hydrologic Evaluation of Landfill Performance (HELP)** workflow. It simulates daily water storage and movement through a configurable landfill profile, with a local web interface in **English, French and Chinese**.
 
-## Quick start / 运行方式
+### Download and start
 
-从本项目文件夹中执行：
+**[Download the complete application ZIP](HELP_Model_Python_v2_3_2.zip)**
+
+1. Install **Python 3.10 or newer**.
+2. Download the ZIP above and extract **all** its contents.
+3. On Windows, double-click `Start_Web.cmd` inside the extracted project folder.
+4. The local web interface opens in your browser. English is the initial language; use **Langue** to switch to French or Chinese.
+
+The packaged web interface and calculation engine use the Python standard library; Streamlit is optional. On other systems, run this command from the extracted project folder:
 
 ```bash
-python help_mvp.py run --config examples/config.json --weather examples/weather_synthetic.csv --out sample_outputs
-python help_mvp.py plot --out sample_outputs  # optional: pip install matplotlib
+python web_server.py --open
+```
+
+Use the complete ZIP for a runnable installation. It preserves the required `web/`, `examples/`, `docs/` and `tests/` folders. The loose files currently visible in this repository were uploaded without that directory hierarchy. Opening `index.html` directly supports editing and previews; calculations require the local Python server.
+
+### Features
+
+- Click a layer to select it, then add, edit, move up/down or delete layers.
+- Configure soil, waste, drainage, barrier-soil and geomembrane layers with stable IDs and type-specific fields.
+- Set layer thickness, hydraulic conductivity and applicable porosity, field capacity, wilting point, initial moisture and drainage parameters.
+- Import/export JSON profiles; import CSV/TSV weather or paste rainfall data. The optional Streamlit interface also supports Excel input.
+- Track runoff, evapotranspiration, layer storage, interlayer flow, independent drainage collection, recirculation and bottom outflow.
+- Select chart start/end dates and daily, monthly or annual display, with axis labels and units.
+- Export balances, per-layer results, input data and configuration.
+
+### Inputs and results
+
+Daily weather uses `date,precip_mm,temp_c,pet_mm`, with consecutive ISO dates (`YYYY-MM-DD`). The interface can assist with column mapping and units. Rainfall-only inputs require explicit assumptions for missing temperature and potential evapotranspiration.
+
+Water quantities are expressed as site-area-equivalent depth in millimetres. Daily fluxes are shown in **mm/day**; monthly and annual flux totals are in **mm**. Monthly/yearly views sum selected daily amounts, so their values and automatic vertical scales differ from the daily view. Partial periods include only the selected days.
+
+Volume conversion: `m³ = mm × area_m2 / 1000`.
+
+The solver checks both daily system balances and individual layer balances. Water awaiting next-day recirculation remains part of system storage.
+
+### Methods and scope
+
+Available options include SCS Curve Number runoff, moisture-adjusted CN, modified Penman potential evapotranspiration, simplified unsaturated flow, lateral drainage and geomembrane defect leakage formulas. Their assumptions and input requirements are documented in [the methods notes](V22_METHODS.md).
+
+**This is an independent approximation, not the official EPA HELP software.** Complete numerical equivalence to EPA HELP and accuracy against field measurements have not been established. A closed water balance verifies accounting consistency, not predictive accuracy. Example profiles and weather are illustrative synthetic data.
+
+### Documentation and checks
+
+- [English interface guide](UI_GUIDE_en.md)
+- [French interface guide](UI_GUIDE_fr.md)
+- [Web guide](WEB_GUIDE.md) and [method details](V22_METHODS.md) — detailed notes are in Chinese.
+- Additional documentation, JSON templates, example profiles and tests are included in the ZIP.
+
+From the **extracted project folder**, run:
+
+```bash
 python -m unittest discover -s tests -v
+node --test tests/test_time_series.cjs
 ```
 
-自行生成**合成气象**：
+Node.js is used for the JavaScript checks only. Optional Python interface/schema checks require their corresponding dependencies.
+
+---
+
+## Français
+
+### Présentation
+
+Un modèle Python indépendant inspiré du fonctionnement de **HELP (Hydrologic Evaluation of Landfill Performance)**. Il simule quotidiennement le stockage et les transferts d’eau dans un profil de décharge configurable, avec une interface web locale en **anglais, français et chinois**.
+
+### Téléchargement et démarrage
+
+**[Télécharger l’application complète au format ZIP](HELP_Model_Python_v2_3_2.zip)**
+
+1. Installez **Python 3.10 ou une version ultérieure**.
+2. Téléchargez le ZIP ci-dessus et décompressez **tout** son contenu.
+3. Sous Windows, double-cliquez sur `Start_Web.cmd` dans le dossier du projet décompressé.
+4. L’interface web locale s’ouvre dans votre navigateur. La langue initiale est l’anglais ; le sélecteur **Langue** permet de choisir le français ou le chinois.
+
+L’interface web fournie et le moteur de calcul utilisent la bibliothèque standard de Python ; Streamlit est facultatif. Sur les autres systèmes, exécutez cette commande depuis le dossier du projet décompressé :
 
 ```bash
-python help_mvp.py demo-weather --year 2024 --years 2 --out examples/my_synthetic_weather.csv
+python web_server.py --open
 ```
 
-Windows 可把 `python` 换成 `py`。
+Utilisez le ZIP complet pour obtenir une installation exécutable. Il conserve les dossiers nécessaires `web/`, `examples/`, `docs/` et `tests/`. Les fichiers séparés actuellement visibles dans ce dépôt ont été téléversés sans cette arborescence. L’ouverture directe de `index.html` permet l’édition et les aperçus ; les calculs nécessitent le serveur Python local.
 
-## File structure
+### Fonctionnalités
 
-- `help_mvp.py` — independent simulation, CSV I/O, optional plotting and command-line interface
-- `examples/config.json` — **illustrative, not site-specific or calibrated** landfill configuration
-- `examples/weather_synthetic.csv` — **simulated/synthetic**, not official Ottawa weather observations
-- `sample_outputs/daily.csv`, `monthly.csv`, `annual.csv`, `summary.json`, `hydrology.png` — sample output from illustrative parameters
-- `tests/test_help_mvp.py` — conservation, runoff, climate and validation checks
-- `TECHNICAL_NOTES.md` — implementation assumptions and steps toward true HELP parity
+- Sélection d’une couche par un clic, puis ajout, modification, déplacement vers le haut/bas ou suppression.
+- Configuration de couches de sol, de déchets, de drainage, de barrière en sol et de géomembrane, avec identifiants stables et champs adaptés à chaque type.
+- Réglage de l’épaisseur, de la conductivité hydraulique et, selon le type, de la porosité, de la capacité au champ, du point de flétrissement, de l’humidité initiale et des paramètres de drainage.
+- Importation/exportation de profils JSON ; importation météo CSV/TSV ou collage de précipitations. L’interface Streamlit facultative accepte aussi les fichiers Excel.
+- Suivi du ruissellement, de l’évapotranspiration, du stockage par couche, des transferts verticaux, de la collecte indépendante des drainages, de la recirculation et de la sortie à la base.
+- Choix des dates de début/fin et d’un affichage journalier, mensuel ou annuel, avec noms des axes et unités.
+- Exportation des bilans, des résultats par couche, des données d’entrée et de la configuration.
 
-## Required weather CSV / 日气象输入
+### Données d’entrée et résultats
 
-`date,precip_mm,temp_c,pet_mm`，例如：
+Les données météo quotidiennes utilisent `date,precip_mm,temp_c,pet_mm`, avec des dates ISO consécutives (`YYYY-MM-DD`). L’interface facilite la correspondance des colonnes et des unités. Des données limitées aux précipitations nécessitent des hypothèses explicites pour la température et l’évapotranspiration potentielle manquantes.
 
-```csv
-date,precip_mm,temp_c,pet_mm
-2026-01-01,2,-8,0.4
-2026-01-02,0,-6,0.5
-2026-01-03,9,4,0.9
+Les quantités d’eau sont exprimées en lame d’eau équivalente sur la superficie du site, en millimètres. Les flux journaliers sont affichés en **mm/jour** ; les cumuls mensuels et annuels sont en **mm**. Les vues mensuelles/annuelles additionnent les quantités des jours sélectionnés : leurs valeurs et leurs échelles verticales automatiques diffèrent donc de la vue journalière. Les périodes incomplètes comprennent uniquement les jours sélectionnés.
+
+Conversion en volume : `m³ = mm × area_m2 / 1000`.
+
+Le moteur vérifie le bilan quotidien du système et celui de chaque couche. L’eau en attente de recirculation le lendemain reste incluse dans le stockage.
+
+### Méthodes et portée
+
+Les options comprennent le ruissellement par Curve Number SCS, un CN ajusté à l’humidité, l’évapotranspiration potentielle de Penman modifiée, un écoulement non saturé simplifié, le drainage latéral et des formules de fuite par défauts de géomembrane. Les hypothèses et les données nécessaires figurent dans [les notes méthodologiques](V22_METHODS.md).
+
+**Il s’agit d’une approximation indépendante, et non du logiciel officiel EPA HELP.** L’équivalence numérique complète à EPA HELP et la précision par rapport aux mesures de terrain n’ont pas été établies. Un bilan hydrique fermé vérifie la cohérence comptable, pas la précision prédictive. Les profils et les données météo d’exemple sont synthétiques et illustratifs.
+
+### Documentation et vérifications
+
+- [Guide de l’interface en français](UI_GUIDE_fr.md)
+- [Guide de l’interface en anglais](UI_GUIDE_en.md)
+- [Guide web](WEB_GUIDE.md) et [détails méthodologiques](V22_METHODS.md) — les notes détaillées sont en chinois.
+- Le ZIP contient d’autres documents, des modèles JSON, des profils d’exemple et les tests.
+
+Depuis le **dossier du projet décompressé**, exécutez :
+
+```bash
+python -m unittest discover -s tests -v
+node --test tests/test_time_series.cjs
 ```
 
-必须逐日连续，不能重复或跳日期。`precip_mm` 是一天的降水水当量；`temp_c` 是日平均气温；`pet_mm` 是用户**外部提供的潜在蒸散量**，本程序没有重现 HELP 官方的 Penman/PET 生成器。每天的土壤蒸散不会超过 PET。降雪通过雪储量平衡计量，融雪不会作为额外水源再计入总质量。
-
-## Config keys / 配置
-
-`curve_number`：固定 SCS-CN，取值 0–100（不含端点）；`root_depth_mm`：土壤蒸散可达深度；`substeps_per_day`：日内子步数，默认 4；`layers`：从地表到防渗层上方的可渗透介质列表。
-
-每个 `layer`：
-
-| Field | Meaning |
-|---|---|
-| `kind` | `soil`, `waste`, `drain` |
-| `thickness_mm` | layer thickness, mm |
-| `porosity` | saturated volumetric water fraction |
-| `field_capacity` | field-capacity fraction |
-| `wilting_point` | wilting-point fraction |
-| `initial_theta` | initial volumetric water fraction |
-| `ksat_mm_day` | saturated vertical conductivity, mm/day |
-| `brooks_corey_lambda` | assumed retention pore index, dimensionless |
-| `lateral_ksat_mm_day` | lateral conductivity, mm/day (`drain` only; currently drainage routed only from **bottom** layer) |
-| `slope_fraction` | e.g. 0.03 is 3% |
-| `drainage_length_m` | average lateral flow path length in metres |
-
-`liner` 可为 `null`（底部自由排水），或 `{ "thickness_mm":600, "ksat_mm_day":0.02, "geomembrane_leakage_multiplier":0.1 }`。最后一个变量只是人为定义的相对泄漏因子，**并不是** Giroud 土工膜针孔/破损公式，也不能据此推断实际渗漏率。通常值需通过数值基准或观测校准。`recirculation_fraction` 为在第二天回灌的侧向排水比例，需配套 `recirculation_target_index` 指定回灌的层编号（从 0 开始）。
-
-**设计限制：目前只能从最底层 `drain` 收集侧向排水，尚不支持多个独立导排子系统。**
-
-## Key outputs / 核心结果
-
-每日输出 `daily.csv`：
-
-- `runoff_mm`：包括 CN 直接径流、饱和溢流以及回灌过量返回地表的总径流
-- `infiltration_mm`：降雨+融雪实际进入第一层的水量，不含回灌注入
-- `et_mm`：土壤蒸散与雪升华总量
-- `leachate_collected_mm`：侧向流出系统、未回灌的实际收集水量
-- `liner_leakage_mm`：底部流出/防渗层渗漏的近似量（有/无防渗层使用不同方法）
-- `snowpack_mm`, `soil_storage_mm`, `total_storage_mm`：末日储存量；`total_storage_mm` 包括计划第二天回灌的暂存水
-- `balance_error_mm`：**应接近零**的水量守恒残差
-
-每日质量平衡：
-
-`storage_before + precipitation = storage_after + runoff + ET + leachate_collected + liner_leakage`
-
-月、年汇总的 `mm` 是**面积归一化水深**。换算体积：`m³ = mm × m² / 1000`。例如对 1 公顷（10,000 m²），`1 mm = 10 m³`。
-
-## What is from HELP vs approximate?
-
-| Model element | Status |
-|---|---|
-| Daily / multi-layer storage routing with substeps | **Workflow analogue**, not line-for-line HELP algorithm |
-| Fixed NRCS/SCS Curve Number with Ia=0.2S | **Recognized SCS equation**; lacks HELP's moisture/slope/frozen-soil CN adjustments |
-| Soil water K(theta) | **Campbell/Brooks-Corey inspired**; uses wilting-point as residual proxy and assumed lambda |
-| Snowmelt | **Degree-day approximation**, not SNOW-17 |
-| Actual ET | Root-zone availability-limited extraction; **not Ritchie/HELP** |
-| PET input | User supplied; **not HELP modified Penman** |
-| Lateral drainage | **Darcy-type approximation**, not HELP Boussinesq / Dupuit solution |
-| Soil liner | **Darcy-based surrogate** with simplified head |
-| Geomembrane | **User-controlled multiplier only**, not HELP Giroud defect cases |
-| Recirculation | Next-day simplified injection; does not model all official configurations |
-| Vegetation growth, interception, frozen ground, soil liners mid-profile | **Not implemented** |
-
-## Grounding documents
-
-1. US EPA, [HELP Model downloads](https://www.epa.gov/land-research/hydrologic-evaluation-landfill-performance-help-model) — official HELP 4.0.1.
-2. US EPA, [HELP 4.0 User Manual](https://www.epa.gov/land-research/help-40-user-manual), January 2020.
-3. Schroeder et al. (1994), [HELP v3 Engineering Documentation](https://nepis.epa.gov/Exe/ZyPURL.cgi?Dockey=300038SW.TXT), EPA/600/R-94/168b — sections 3 and 4.
-
-To reach a defensible HELP replica, implement and test the engineering equations individually, obtain representative HELP 4.0.1 reference projects and daily model outputs, then compare seasonal totals, daily traces, water balance and flux sensitivities. Implement the frozen-soil and geomembrane defects modules before relying on cold-climate or lined-landfill predictions.
+Node.js sert uniquement aux vérifications JavaScript. Les contrôles Python facultatifs de l’interface et du schéma nécessitent les dépendances correspondantes.

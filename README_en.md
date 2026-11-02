@@ -1,56 +1,66 @@
-# HELP Multilayer Water Balance — v2.3.1
+# HELP — Landfill Water Balance
 
-Charts support start/end dates, Full period, Last 30/90/365 days, and day/month/year intervals. Both endpoints are included; presets end at the last simulated day. Monthly/yearly values sum only selected daily amounts, without extrapolating partial periods. The daily table follows the range; full totals and ZIP downloads keep the entire simulation. Language changes preserve the selection. A new run resets the date range to its complete results.
+[English](README_en.md) · [Français](README_fr.md) · [Bilingual overview](README.md)
 
-The package now includes a complete HTML main interface: **`index.html`**, with clickable layers, add/delete/reorder, parameter forms, JSON import/export, CSV/TSV/pasted weather, simulation, charts and result downloads.
+### Overview
 
-**Extract the whole ZIP and double-click `Start_Web.cmd`.** Requires Python 3.10+, using only its standard library. No Streamlit install is needed. The browser opens automatically. The initial language is **English**, followed by **Français**, then **中文** in the selector; later selections are remembered by the web interface.
+An independent Python model inspired by the **Hydrologic Evaluation of Landfill Performance (HELP)** workflow. It simulates daily water storage and movement through a configurable landfill profile, with a local web interface in **English, French and Chinese**.
 
-Opening `index.html` directly supports offline editing, weather preview and JSON export. Calculations require the local page opened by `Start_Web.cmd`. All web assets are included; keep the `web/` directory beside `index.html`. Excel can be saved as CSV or imported through the retained Streamlit interface.
+### Download and start
 
-The help page is fully trilingual. See `docs/WEB_GUIDE.md` (Chinese) and `docs/WEB_TEST_REPORT.md` for the web workflow and checks. The original Streamlit interface remains optional, with the same Python solver and v2.2 formula scope. Its instructions follow.
+**[Download the complete application ZIP](HELP_Model_Python_v2_3_2.zip)**
 
-Click any layer cell to select its layer, then move, delete or edit it below. Rainfall import now supports CSV/TSV/XLSX, sheet and column selection, units, preview and pasted CSV. Rainfall-only input uses explicitly displayed temperature/PET constants. Modified Penman requires radiation, humidity and 2 m wind data.
+1. Install **Python 3.10 or newer**.
+2. Download the ZIP above and extract **all** its contents.
+3. On Windows, double-click `Start_Web.cmd` inside the extracted project folder.
+4. The local web interface opens in your browser. English is the initial language; use **Langue** to switch to French or Chinese.
 
-Optional process settings add daily moisture-adjusted CN, Modified Penman PET, HELP steady lateral drainage equations and good/poor-contact Giroud defect equations. The extraction of actual ET with seasonal LAI remains approximate. These additions are formula-level modules within an independent solver, not complete EPA HELP equivalence. Detailed applicability and sources are in `docs/V22_METHODS.md` (Chinese).
+The packaged web interface and calculation engine use the Python standard library; Streamlit is optional. On other systems, run this command from the extracted project folder:
 
-The interface supports Chinese, French and English. Select the language in the sidebar, or start with `Start_UI_ZH.cmd`, `Start_UI_FR.cmd` or `Start_UI_EN.cmd`. The small subtitle and yellow notice formerly shown below the title have been removed. Method details remain in the help tab and technical documents.
-
-## Start
-
-Python 3.10+ is required. On Windows, double-click the launcher for your language. The first run creates a virtual environment inside the project and installs Streamlit from PyPI. You can also run:
-
-```powershell
-python -m venv .venv
-.venv\Scripts\python -m pip install -r requirements-ui.txt
-.venv\Scripts\python -m streamlit run app.py --server.address 127.0.0.1 --browser.gatherUsageStats false
+```bash
+python web_server.py --open
 ```
 
-## Configure and run
+Use the complete ZIP for a runnable installation. It preserves the required `web/`, `examples/`, `docs/` and `tests/` folders. The loose files currently visible in this repository were uploaded without that directory hierarchy. Opening `index.html` directly supports editing and previews; calculations require the local Python server.
 
-1. Load one of the five example profiles, or import JSON.
-2. Add soil, waste, drainage, barrier or geomembrane layers. Select a layer to edit, reorder or delete it.
-3. Set thickness, hydraulic conductivity and applicable storage/drainage parameters. Save the layer.
-4. Save global settings and any recirculation target. Stable IDs follow layers when reordered.
-5. Upload consecutive daily weather (`date,precip_mm,temp_c,pet_mm`), or use the supplied two-year synthetic series.
-6. Run the model and download the results ZIP.
+### Features
 
-Changing languages preserves the saved configuration and previous results. Unsaved form edits should be saved before switching. JSON/CSV keys, layer IDs and user-entered names are kept as supplied so files remain compatible between languages.
+- Click a layer to select it, then add, edit, move up/down or delete layers.
+- Configure soil, waste, drainage, barrier-soil and geomembrane layers with stable IDs and type-specific fields.
+- Set layer thickness, hydraulic conductivity and applicable porosity, field capacity, wilting point, initial moisture and drainage parameters.
+- Import/export JSON profiles; import CSV/TSV weather or paste rainfall data. The optional Streamlit interface also supports Excel input.
+- Track runoff, evapotranspiration, layer storage, interlayer flow, independent drainage collection, recirculation and bottom outflow.
+- Select chart start/end dates and daily, monthly or annual display, with axis labels and units.
+- Export balances, per-layer results, input data and configuration.
 
-## Results
+### Inputs and results
 
-The ZIP contains the exact configuration and weather used, daily/monthly/annual balances, per-layer flows and storage, and a summary. All water quantities are depths over the site area. `m³ = mm × area_m2 / 1000`.
+Daily weather uses `date,precip_mm,temp_c,pet_mm`, with consecutive ISO dates (`YYYY-MM-DD`). The interface can assist with column mapping and units. Rainfall-only inputs require explicit assumptions for missing temperature and potential evapotranspiration.
 
-Each drainage layer contributes independently to collection. Intermediate liner flow is an internal transfer; only flow crossing the bottom boundary is counted as bottom outflow. `liner_leakage_mm` is an alias of `bottom_leakage_mm`, not an additional outlet. Pending next-day recirculation remains inside system storage.
+Water quantities are expressed as site-area-equivalent depth in millimetres. Daily fluxes are shown in **mm/day**; monthly and annual flux totals are in **mm**. Monthly/yearly views sum selected daily amounts, so their values and automatic vertical scales differ from the daily view. Partial periods include only the selected days.
 
-Daily balance: initial storage + precipitation = final storage + runoff + ET + net collection + bottom outflow. Per-layer balances are also checked. A residual above 1e-7 mm stops the calculation.
+Volume conversion: `m³ = mm × area_m2 / 1000`.
 
-## Methods
+The solver checks both daily system balances and individual layer balances. Water awaiting next-day recirculation remains part of system storage.
 
-This is an independent approximate research model derived from the original Python MVP. It has not been validated as equivalent to EPA HELP or against field data. Fixed CN, degree-day snowmelt, externally supplied PET, bucket storage, local head estimates, Darcy-type drainage and an empirical membrane gate are used. A closed mass balance does not establish physical accuracy. Membrane defects, membrane-soil contact, frozen ground and vegetation growth are not resolved.
+### Methods and scope
 
-See `docs/UI_GUIDE_en.md`, `TECHNICAL_NOTES.md` and `docs/TEST_REPORT.md`. The detailed engineering notes and test report are in Chinese. `legacy/` preserves the original source and documentation.
+Available options include SCS Curve Number runoff, moisture-adjusted CN, modified Penman potential evapotranspiration, simplified unsaturated flow, lateral drainage and geomembrane defect leakage formulas. Their assumptions and input requirements are documented in [the methods notes](V22_METHODS.md).
 
-The five example profiles cover unlined drainage, a composite bottom liner, double liners, separate cover/bottom drainage, and recirculation. Parameters and weather are illustrative, not site measurements. `examples/config.schema.json` describes the common JSON format.
+**This is an independent approximation, not the official EPA HELP software.** Complete numerical equivalence to EPA HELP and accuracy against field measurements have not been established. A closed water balance verifies accounting consistency, not predictive accuracy. Example profiles and weather are illustrative synthetic data.
 
-Both chart axes are labeled. The X axis identifies date, month or year; the Y axis names the selected variable and its unit: mm/day for daily values and mm for monthly/yearly totals.
+### Documentation and checks
+
+- [English interface guide](UI_GUIDE_en.md)
+- [French interface guide](UI_GUIDE_fr.md)
+- [Web guide](WEB_GUIDE.md) and [method details](V22_METHODS.md) — detailed notes are in Chinese.
+- Additional documentation, JSON templates, example profiles and tests are included in the ZIP.
+
+From the **extracted project folder**, run:
+
+```bash
+python -m unittest discover -s tests -v
+node --test tests/test_time_series.cjs
+```
+
+Node.js is used for the JavaScript checks only. Optional Python interface/schema checks require their corresponding dependencies.
