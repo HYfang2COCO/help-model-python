@@ -1,62 +1,59 @@
-# Technical notes / 算法说明
+# v2 技术说明：可配置多层剖面
 
-## 1. Reference implementation basis
+**v2.2补充优先参见 `docs/V22_METHODS.md`。** 下文描述原有固定CN/外部PET/Darcy近似/经验膜倍率模式；v2.2保留这些模式，并增加可选公式模块，不能把下文旧模式的限制理解成所有新模式的实现状态。
 
-The official HELP V4.0.1 is an EPA quasi-2D model. This MVP is a separately written Python hydrologic water budget. The EPA 1994 v3 engineering documentation describes calculations; this prototype uses **some** related conceptual relationships but it does not claim official numeric equivalence.
+## 来源与变更
 
-## 2. Time sequence
+原始 Library 包 `HELP_Model_Python_MVP.zip` 已实际读取：`help_mvp.py`、README、TECHNICAL_NOTES、原配置及测试。原模型只有 soil/waste/drain 多孔层；侧向排水只发生于最底层，底衬为剖面外的一个 lumped liner。v2 保留原思路并重写层路由，见 `legacy/` 中原文件。未复制 EPA 程序源码。
 
-For each day and `n` equal intraday substeps:
+## 状态与边界
 
-1. Classify precipitation as rainfall or snow based on daily mean temperature; update snow water equivalent (SWE).
-2. Remove a bounded fraction of daily PET as snow sublimation; degree-day melt is drawn from SWE.
-3. Split liquid input into direct runoff and potential infiltration using the fixed SCS curve number.
-4. Inject previous day's recirculated flow to a chosen layer; return any excess above pore-space capacity upward to surface runoff.
-5. For each substep, add a fraction of daily infiltrating liquid to the cover soil; extract root-zone moisture up to the wilting point; route any water exceeding field capacity down through the porous layers, capped by conductivity and underlying pore-space capacity.
-6. In the bottom layer, split removable gravity water between lateral drainage and basal leakage by their calculated potential rates. Preserve mass when fluxes compete.
-7. Remove the non-recirculated fraction from the landfill; store the remaining fraction for reinjection tomorrow. Verify daily balance.
+同一水平投影面积上的一维顺序储水桶；任意数量层，从上到下按 JSON 数组次序计算。多孔层状态 `S_i = theta_i T_i`，容量 `n_i T_i`。geomembrane 无储水，作为相邻层间的通量限流闸门，连续膜取最小可通过流量。界面允许任意重排并给出部分不常见布局提示；**不实施 EPA HELP 的全部层序规则**，自由排列不等于物理合理或官方兼容。
 
-## 3. Equations and units
+表面边界无持久积水：超过首个接收多孔层导水率、容量或上覆膜限额的潜在入渗立即成为饱和/受限入渗径流。底部为开边界；最后多孔层若下覆膜则受膜限额约束。无侧壁边界。所有多孔层初始储水均入账，包括新 barrier。
 
-Everything except dates and air temperature is stored as **mm water equivalent per site area**. Soil layers use `theta = water_depth_mm / thickness_mm`.
+## 公式（本项目近似算法）
 
-**SCS runoff:** `S = 25400/CN - 254` (mm), `Ia=0.2S`, then `Q = (P - Ia)^2 / (P + 0.8S)` when `P > Ia`, else zero.
+1. 固定 SCS-CN：`S_cn=25400/CN-254`，`Ia=0.2 S_cn`。液态输入 P 大于 Ia 时，`Q=(P-Ia)^2/(P+0.8 S_cn)`；否则 Q=0。没有湿度、坡度、冻土 CN 修正。
+2. 雨雪按日均温阈值二分；雪升华为 `min(SWE, PET*f_sub)`；融雪为 `min(SWE, DDF*max(0,T-T_melt))`。融雪来自雪储量，不能作为额外外部水源。
+3. soil/waste/drainage 导水率：`Se=clip((theta-WP)/(n-WP),0,1)`；`K(theta)=Ks*Se^(3+2/lambda)`。用 WP 代替残余含水率，λ由用户设置。只允许超过 FC 的储水形成重力排水。
+4. 局部水头代理：`h=min(T,max(0,S-FC*T)/(n-FC))`。h是本层可排水储量的等效高度，不是求解得到的压强水头，不包括上方多层水柱。
+5. barrier 自身可流出率：`Ks*(1+h/T)`，只排出超过 FC 的储水；进入下方 barrier 的通量还受 `Ks_below*(1+h_above/T_below)` 限制。用局部 h 的单向近似，非承压/饱和压力场解。
+6. 膜限流率：`Ks_mem*(1+h_upstream/T_mem)*leakage_multiplier`。上游 h 取紧邻上方多孔层；顶层膜 h=0。Ks 为用户给定的**等效经验导水率**，并非可直接从材料扩散系数替代而来。倍率为0可完全阻流。此式没有针孔密度、缺陷大小、安装质量、膜土接触和扩散过程；不等于 Giroud 或官方膜模型。
+7. 垂向候选水量：`qv=min(K_source*dt, receiver_limit*dt, membrane_limits*dt, receiver_free_capacity)`，底部无接收层容量约束。通量跨越膜时，同时记入每个膜的入流和出流，因此膜残差为0。
+8. 任一 drainage 侧向候选：`ql=K_lat*(h/L)*(slope+h/L)*dt`，L由m转mm。没有原版 Boussinesq/Dupuit 解、管道容量、堵塞或出口回水。
+9. 垂向与侧向争用同一可排水储量 `W=max(0,S-FC*T)`：二者同乘 `min(1,W/(qv+ql))`，从而不重复抽水。剩余量受接收层容量限制。候选率为零时两者均为零。
+10. ET只从根区覆盖的 soil/waste 中抽取高于 WP 的水，按根深重叠长度分配并重分配不足份额。根不穿 barrier/geomembrane，drainage 不抽 ET。总ET（含雪升华）不超过输入 PET。
 
-**Unsaturated conductivity surrogate:**
+## 日内运算顺序
 
-`Se = clamp((theta - theta_wilt)/(theta_sat - theta_wilt), 0, 1)`
+日初验证气象→雨雪/升华/融雪→CN直接径流→注入昨天暂存回灌→n个等长子步（默认24）：
 
-`K(theta) = Ks * Se^(3+2/lambda)`
+表面输入均分并按容量/限流接收→ET均分→从上到下路由各多孔层→分配各导排层侧向外流与垂向流→更新接收层储水。
 
-This uses a common Campbell-like exponent. **HELP infers pore-index and residual water from retention data** and iteratively solves segment flux. This version assumes `theta_r ≈ theta_wilt`, a material simplification.
+同一子步新入流水可继续向下通过多层；接收层空余容量按当时状态计算，接收层稍后排出的空间要等下一子步才能由上层使用。结果依赖子步数与层划分，建议比较24/48/96并结合场景检查敏感性，未宣称普遍收敛。厚废物层的层均含水量会掩盖湿润锋与优先流。
 
-**Vertical step flux:** `q = min(water_above_FC, K(theta)*dt, next_layer_Ks*dt, receiving_pore_capacity)`.
+日末：全部侧向总流量按统一回灌比例拆成净收集和待明日回灌暂存；计算日平衡及逐层平衡。回灌目标 id 在重排时保持；非膜层可接收回灌，容量不足量作为显式外排，不瞬移穿过膜。尚不支持每个导排层不同的回灌比例/目标。
 
-**Bottom layer hydraulic head surrogate:** `h = min(T, max(0, storage - FC*T)/(porosity - FC))`. This intentionally bounds head by the modeled bottom layer thickness and does not resolve the upstream saturated layer stack.
+## EPA HELP 与本项目的区别
 
-**Basal liner:** `q_liner = K_liner * (1 + h/T_liner) * multiplier`, if `h>0`; otherwise 0. The `multiplier` is a user-selected heuristic. No actual Giroud defect geometry, membrane diffusion or clay/membrane interface resistance is simulated.
+EPA HELP 是准二维填埋水量模型，官方手册与工程说明涵盖专门的地表、非饱和垂向、侧向排水及衬垫过程。本项目沿用其工作流程概念，不实现全部公式。
 
-**Lateral drainage:** `q_lateral = K_lat*(h/L)*(slope + h/L)` when bottom layer has `kind=drain`. This matches dimensional behavior of a simplified Darcy gradient calculation but is **not** the original HELP Boussinesq/Dupuit closed form or iterative coupling.
+| 过程 | 本项目 v2 |
+|---|---|
+| PET/ET、植被 | 外部PET、根区限水抽取；无官方PET生成、植被生长或截留 |
+| 雨雪与冻土 | 度日近似；无完整热平衡或冻土过程 |
+| 垂向流 | 容量约束储水桶与简化 K(theta)；无官方非线性分段迭代 |
+| 导排 | 每层简化Darcy缩放；无官方侧向耦合求解 |
+| 膜与复合衬垫 | 独立经验膜闸门 + 有储水barrier；无缺陷/接触状态公式 |
+| 几何 | 自由数组布局；不验证官方全部剖面规则 |
 
-**Water balance:** `R = Storage_before + Precipitation - (Storage_after + Runoff + ET + Collected + Leakage)` where Storage includes soil, SWE and recirculation awaiting next-day application. `|R|` should remain near floating point round-off.
+**接下来的科学验证**：使用相同气象、参数单位和初始状态导出官方 HELP 的逐日/分层结果，逐项对比径流、ET、收集、层储量及底漏，报告季节偏差与参数敏感性；再实施官方过程并对实测资料校准。当前自动化测试不包含这一步。
 
-## 4. Limitations especially relevant to Canadian landfills
+## 官方资料
 
-- A crude degree-day snow model cannot reproduce HELP's SNOW-17; **frozen soils, frost depth, rain-on-snow heat balance, vegetation and variable CN are omitted**. Predictions for Ontario winters are especially preliminary.
-- No capillary rise, 2D spatial discretization, underdrain backwater, high-head correction beyond drain thickness, defects in HDPE liner, composite liner flow/contact quality, or leachate temperature effects.
-- Fixed daily PET misses actual radiation, wind, vapor pressure and seasonal canopy dynamics.
-- No field calibration: conductivity and retention vary by waste/cover age, compaction, channels and moisture.
-- This is **not** a contaminant transport, landfill gas, landfill settlement or PFAS fate model.
-- For a landfill with multiple liner systems, the sequence of liners and drain layers must be modeled explicitly; this prototype has only one basal liner and can only laterally drain the bottom layer.
+核对日期：2026-10-18。
 
-## 5. Plan to improve parity (recommended order)
-
-1. Run a set of official HELP 4.0.1 baseline projects to collect daily weather, percolation, runoff, ET, drainage, and liner leakage reference curves.
-2. Reproduce moisture-dependent CN adjustments, surface storage and the full temperature-sensitive snow/frozen-soil system.
-3. Implement original water retention parameter inference, segment subdivision and iterative nonlinear storage routing with variable timestep.
-4. Replace simplified PET/root ET with modified Penman, Ritchie evaporation, vegetation growth and interception.
-5. Implement exact Boussinesq lateral drainage and coupled layer-head/leakage iterations for lined profiles.
-6. Add soil/geomembrane/composite liner types (defects, interface contact, installation condition, polymer diffusivity), multiliner subprofiles and recirculation.
-7. Regression-test each climate regime and layer design against official daily series, report deviations and uncertainty ranges. Use local field data to calibrate if needed.
-
-For a true source-code migration, the official v3 FORTRAN program was described as available via NTIS (1994 engineering documentation, program identification). An original codebase would need separate acquisition/license assessment; none of that code has been copied here.
+- [EPA HELP 官方页面与下载](https://www.epa.gov/land-research/hydrologic-evaluation-landfill-performance-help-model)
+- [HELP 4.0 User Manual](https://www.epa.gov/land-research/help-40-user-manual)，EPA/600/B-20/219，2020，过程概述、层数据及层序规则。
+- [HELP v3 Engineering Documentation](https://nepis.epa.gov/Exe/ZyPURL.cgi?Dockey=300038SW.TXT)，EPA/600/R-94/168b，1994，第3节参数、第4节算法，尤其4.13～4.21地下路由及排水/衬垫。

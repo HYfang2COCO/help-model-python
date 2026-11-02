@@ -8,7 +8,7 @@ Un modèle Python indépendant inspiré du fonctionnement de **HELP (Hydrologic 
 
 ### Téléchargement et démarrage
 
-**[Télécharger l’application complète au format ZIP](HELP_Model_Python_v2_3_2.zip)**
+**[Télécharger l’application complète au format ZIP](releases/HELP_Model_Python_v2_3_1_Time_Range_Trilingual.zip)**
 
 1. Installez **Python 3.10 ou une version ultérieure**.
 2. Téléchargez le ZIP ci-dessus et décompressez **tout** son contenu.
@@ -21,7 +21,7 @@ L’interface web fournie et le moteur de calcul utilisent la bibliothèque stan
 python web_server.py --open
 ```
 
-Utilisez le ZIP complet pour obtenir une installation exécutable. Il conserve les dossiers nécessaires `web/`, `examples/`, `docs/` et `tests/`. Les fichiers séparés actuellement visibles dans ce dépôt ont été téléversés sans cette arborescence. L’ouverture directe de `index.html` permet l’édition et les aperçus ; les calculs nécessitent le serveur Python local.
+Utilisez le ZIP complet pour obtenir une installation exécutable. Il conserve les dossiers nécessaires `web/`, `examples/`, `docs/` et `tests/`. La même arborescence est également disponible directement dans ce dépôt. L’ouverture directe de `index.html` permet l’édition et les aperçus ; les calculs nécessitent le serveur Python local.
 
 ### Fonctionnalités
 
@@ -45,15 +45,15 @@ Le moteur vérifie le bilan quotidien du système et celui de chaque couche. L�
 
 ### Méthodes et portée
 
-Les options comprennent le ruissellement par Curve Number SCS, un CN ajusté à l’humidité, l’évapotranspiration potentielle de Penman modifiée, un écoulement non saturé simplifié, le drainage latéral et des formules de fuite par défauts de géomembrane. Les hypothèses et les données nécessaires figurent dans [les notes méthodologiques](V22_METHODS.md).
+Les options comprennent le ruissellement par Curve Number SCS, un CN ajusté à l’humidité, l’évapotranspiration potentielle de Penman modifiée, un écoulement non saturé simplifié, le drainage latéral et des formules de fuite par défauts de géomembrane. Les hypothèses et les données nécessaires figurent dans [les notes méthodologiques](docs/V22_METHODS.md).
 
 **Il s’agit d’une approximation indépendante, et non du logiciel officiel EPA HELP.** L’équivalence numérique complète à EPA HELP et la précision par rapport aux mesures de terrain n’ont pas été établies. Un bilan hydrique fermé vérifie la cohérence comptable, pas la précision prédictive. Les profils et les données météo d’exemple sont synthétiques et illustratifs.
 
 ### Documentation et vérifications
 
-- [Guide de l’interface en français](UI_GUIDE_fr.md)
-- [Guide de l’interface en anglais](UI_GUIDE_en.md)
-- [Guide web](WEB_GUIDE.md) et [détails méthodologiques](V22_METHODS.md) — les notes détaillées sont en chinois.
+- [Guide de l’interface en français](docs/UI_GUIDE_fr.md)
+- [Guide de l’interface en anglais](docs/UI_GUIDE_en.md)
+- [Guide web](docs/WEB_GUIDE.md) et [détails méthodologiques](docs/V22_METHODS.md) — les notes détaillées sont en chinois.
 - Le ZIP contient d’autres documents, des modèles JSON, des profils d’exemple et les tests.
 
 Depuis le **dossier du projet décompressé**, exécutez :

@@ -8,7 +8,7 @@ An independent Python model inspired by the **Hydrologic Evaluation of Landfill 
 
 ### Download and start
 
-**[Download the complete application ZIP](HELP_Model_Python_v2_3_2.zip)**
+**[Download the complete application ZIP](releases/HELP_Model_Python_v2_3_1_Time_Range_Trilingual.zip)**
 
 1. Install **Python 3.10 or newer**.
 2. Download the ZIP above and extract **all** its contents.
@@ -21,7 +21,7 @@ The packaged web interface and calculation engine use the Python standard librar
 python web_server.py --open
 ```
 
-Use the complete ZIP for a runnable installation. It preserves the required `web/`, `examples/`, `docs/` and `tests/` folders. The loose files currently visible in this repository were uploaded without that directory hierarchy. Opening `index.html` directly supports editing and previews; calculations require the local Python server.
+Use the complete ZIP for a runnable installation. It preserves the required `web/`, `examples/`, `docs/` and `tests/` folders. The same directory structure is also available directly in this repository. Opening `index.html` directly supports editing and previews; calculations require the local Python server.
 
 ### Features
 
@@ -45,15 +45,15 @@ The solver checks both daily system balances and individual layer balances. Wate
 
 ### Methods and scope
 
-Available options include SCS Curve Number runoff, moisture-adjusted CN, modified Penman potential evapotranspiration, simplified unsaturated flow, lateral drainage and geomembrane defect leakage formulas. Their assumptions and input requirements are documented in [the methods notes](V22_METHODS.md).
+Available options include SCS Curve Number runoff, moisture-adjusted CN, modified Penman potential evapotranspiration, simplified unsaturated flow, lateral drainage and geomembrane defect leakage formulas. Their assumptions and input requirements are documented in [the methods notes](docs/V22_METHODS.md).
 
 **This is an independent approximation, not the official EPA HELP software.** Complete numerical equivalence to EPA HELP and accuracy against field measurements have not been established. A closed water balance verifies accounting consistency, not predictive accuracy. Example profiles and weather are illustrative synthetic data.
 
 ### Documentation and checks
 
-- [English interface guide](UI_GUIDE_en.md)
-- [French interface guide](UI_GUIDE_fr.md)
-- [Web guide](WEB_GUIDE.md) and [method details](V22_METHODS.md) — detailed notes are in Chinese.
+- [English interface guide](docs/UI_GUIDE_en.md)
+- [French interface guide](docs/UI_GUIDE_fr.md)
+- [Web guide](docs/WEB_GUIDE.md) and [method details](docs/V22_METHODS.md) — detailed notes are in Chinese.
 - Additional documentation, JSON templates, example profiles and tests are included in the ZIP.
 
 From the **extracted project folder**, run:
