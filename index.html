@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#173e38">
+  <title>HELP · Water balance</title>
+  <link rel="icon" href="web/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="web/style.css">
+  <script src="web/data.js" defer></script>
+  <script src="web/time-series.js" defer></script>
+  <script src="web/app.js" defer></script>
+</head>
+<body>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="brand" href="#profile"><img src="web/icon.svg" width="38" height="38" alt=""><span>HELP<span class="brand-sub" data-t="水量模拟">水量模拟</span></span></a>
+    <p class="nav-label" data-t="工作空间"></p>
+    <nav aria-label="Workspace">
+      <button class="nav active" data-page="profile"><span class="nav-icon">▤</span><span data-t="剖面设置"></span><span class="nav-number">01</span></button>
+      <button class="nav" data-page="weather"><span class="nav-icon">☂</span><span data-t="降水与运行"></span><span class="nav-number">02</span></button>
+      <button class="nav" data-page="results"><span class="nav-icon">↗</span><span data-t="结果分析"></span><span class="nav-number">03</span></button>
+      <button class="nav" data-page="guide"><span class="nav-icon">?</span><span data-t="使用说明"></span></button>
+    </nav>
+    <div class="sidebar-bottom"><label for="language">Langue</label><select id="language"><option value="en">English</option><option value="fr">Français</option><option value="zh">中文</option></select><div class="version">HELP 2.3.1 <span data-t="工作空间">工作空间</span></div></div>
+  </aside>
+  <main>
+    <header class="topbar"><div class="breadcrumb"><span data-t="水量模拟"></span><span>/</span><b id="page-title"></b></div><span id="connection" class="status"><i></i><span data-t="连接中"></span></span></header>
+    <div class="content">
+      <div id="message" role="status" hidden></div>
+      <section id="page-profile" class="page">
+        <div class="page-heading"><div><p class="eyebrow" data-t="剖面设置">剖面设置</p><h1 data-t="构建你的多层剖面"></h1><p class="muted" data-t="从地表到底部，逐层定义材料与水流路径。"></p></div><div class="heading-actions"><button id="import-config" class="button" data-t="导入 JSON"></button><button id="export-config" class="button primary" data-t="导出配置"></button><input type="file" id="config-file" accept=".json" hidden></div></div>
+        <div class="project-strip"><label><span data-t="项目名称"></span><input id="site-name"></label><label><span data-t="样例剖面"></span><select id="example"></select></label><button id="load-example" class="button" data-t="载入样例"></button><button id="validate" class="text-button" data-t="校验配置"></button></div>
+        <div class="profile-stats"><div><span data-t="层数"></span><b id="layer-count"></b></div><div><span data-t="总厚度"></span><b id="total-depth"></b></div><div><span data-t="导排层数"></span><b id="drain-count"></b></div><div><span data-t="模拟面积"></span><b id="area-display"></b></div></div>
+        <div class="workspace-grid">
+          <article class="panel layers-panel"><div class="panel-heading"><div><h2 data-t="层序剖面"></h2><p data-t="单击选层，再编辑、移动或删除。"></p></div><span class="small-tag" data-t="地表 → 底部"></span></div><div id="layer-list" class="layer-list"></div><div class="layer-toolbar"><select id="new-kind" aria-label="New layer type"></select><button id="add-layer" class="button" data-t="＋ 新增层"></button></div><p class="panel-footnote" data-t="薄膜为示意厚度；以数值为准。"></p></article>
+          <article class="panel editor-panel"><div class="panel-heading"><div><p class="eyebrow" data-t="选中层"></p><h2 id="editor-title"></h2></div><div class="icon-actions"><button id="move-up" class="icon-button" aria-label="Move up">↑</button><button id="move-down" class="icon-button" aria-label="Move down">↓</button><button id="delete-layer" class="icon-button danger" aria-label="Delete layer">×</button></div></div><form id="layer-form"><div class="field-grid"><label><span data-t="层名称"></span><input id="layer-name" required></label><label><span data-t="层类型"></span><select id="layer-kind"></select></label></div><div id="type-change" hidden><p data-t="更换类型将重置该层参数。"></p><button type="button" class="button" id="apply-kind" data-t="应用层类型"></button></div><div id="layer-fields" class="field-grid"></div><div class="form-bottom"><span id="layer-id" class="muted"></span><button type="submit" class="button primary" data-t="保存参数"></button></div></form></article>
+        </div>
+        <details class="panel settings-panel"><summary data-t="模型设置与计算方法"></summary><form id="settings-form"><div id="settings-fields" class="field-grid settings-grid"></div><div class="form-bottom"><p class="muted" data-t="所有水量以 mm 计，导水率以 mm/day 计。"></p><button class="button primary" type="submit" data-t="保存模型设置"></button></div></form></details>
+        <div class="next-step"><span data-t="剖面准备好后，导入逐日降水开始计算。"></span><button class="text-button" data-go="weather" data-t="前往降水与运行 →"></button></div>
+      </section>
+      <section id="page-weather" class="page" hidden>
+        <div class="page-heading"><div><p class="eyebrow" data-t="降水与运行">降水与运行</p><h1 data-t="导入降水，运行水量模拟"></h1><p class="muted" data-t="使用连续逐日数据，明确每个变量的列与单位。"></p></div><a class="button" href="examples/rainfall_template.csv" download data-t="下载降水模板"></a></div>
+        <div id="offline-note" class="inline-note" hidden data-t="当前为网页编辑模式。计算前请双击包内 Start_Web.cmd，再使用自动打开的页面。"></div>
+        <article class="panel weather-panel"><div class="panel-heading"><h2 data-t="气象数据"></h2><div class="heading-actions"><button id="sample-weather" class="button" data-t="使用合成样例"></button><button id="import-weather" class="button primary" data-t="选择 CSV / TSV"></button><input type="file" id="weather-file" accept=".csv,.tsv,.txt" hidden></div></div><label for="weather-text" class="input-label" data-t="可直接粘贴含列名的 CSV"></label><textarea id="weather-text" rows="6" spellcheck="false" placeholder="date,precip_mm,temp_c,pet_mm&#10;2026-01-01,5,15,2&#10;2026-01-02,0,15,2"></textarea><div class="data-status"><span id="weather-source"></span><button id="read-columns" class="text-button" data-t="读取列名"></button></div><div id="mapping-fields" class="field-grid settings-grid"></div><div class="field-grid settings-grid import-options"><label><span data-t="日期格式"></span><select id="date-format"><option value="%Y-%m-%d">YYYY-MM-DD</option><option value="%d/%m/%Y">DD/MM/YYYY</option><option value="%m/%d/%Y">MM/DD/YYYY</option><option value="%Y/%m/%d">YYYY/MM/DD</option></select></label><label><span data-t="降水单位"></span><select id="precip-unit"><option>mm</option><option>cm</option><option>inch</option></select></label></div><label class="checkbox"><input type="checkbox" id="allow-constants"><span data-t="缺少气温 / PET 时，使用下方明确设置的常数"></span></label><div class="field-grid"><label><span data-t="气温常数（°C）"></span><input id="constant-temp" type="number" value="15" step="any" disabled></label><label><span data-t="PET 常数（mm/day）"></span><input id="constant-pet" type="number" value="2" min="0" step="any" disabled></label></div><p class="muted" data-t="常数是情景假设；Modified Penman 另需太阳辐射、相对湿度及风速列。"></p><div class="form-bottom"><button id="preview-weather" class="button" data-t="校验并预览"></button><button id="run-model" class="button primary" data-t="运行模型 →"></button></div></article>
+        <article id="weather-preview" class="panel table-panel" hidden><div class="panel-heading"><h2 data-t="归一化日数据"></h2><span id="weather-days" class="small-tag"></span></div><div class="table-wrap" id="weather-table"></div></article>
+      </section>
+      <section id="page-results" class="page" hidden>
+        <div class="page-heading"><div><p class="eyebrow" data-t="水量模拟">水量模拟</p><h1 data-t="查看水流去向"></h1><p class="muted" id="result-period"></p></div><a id="download-results" class="button primary" hidden data-t="下载完整结果 ZIP"></a></div><div id="stale-note" class="inline-note" hidden data-t="输入已更改。当前展示上次结果，请重新运行。"></div><div id="empty-results" class="empty-state"><span>↗</span><h2 data-t="尚无计算结果"></h2><p data-t="完成剖面和气象设置后，即可在这里查看水量汇总与逐日变化。"></p><button class="button primary" data-go="weather" data-t="前往降水与运行 →"></button></div><div id="result-content" hidden><p class="totals-label" data-t="全模拟时段汇总"></p><div id="result-cards" class="result-cards"></div><article class="panel chart-panel"><div class="panel-heading"><div><h2 data-t="水量时间曲线"></h2><p id="chart-unit"></p></div><select id="chart-variable" aria-label="Chart variable"></select></div><form id="chart-controls" class="chart-controls">
+          <div class="date-fields">
+            <label><span data-t="开始日期"></span><input id="chart-start" type="date" required aria-describedby="chart-error"></label>
+            <label><span data-t="结束日期"></span><input id="chart-end" type="date" required aria-describedby="chart-error"></label>
+            <label><span data-t="显示间隔"></span><select id="chart-step"></select></label>
+          </div>
+          <div class="range-presets" role="group" aria-label="Time range">
+            <button type="button" class="button" data-range="all" data-t="全部时段"></button>
+            <button type="button" class="button" data-range="30" data-t="最近 30 天"></button>
+            <button type="button" class="button" data-range="90" data-t="最近 90 天"></button>
+            <button type="button" class="button" data-range="365" data-t="最近 365 天"></button>
+          </div>
+          <p id="chart-error" class="chart-error" role="alert" hidden></p>
+          <p id="chart-period" class="muted" aria-live="polite"></p>
+          <p class="range-help" data-t="月、年按所选日期内的日水量求和；首尾不足整月或整年时仅包含选中天数。"></p>
+        </form><div id="result-chart"></div></article><div id="balance-note" class="balance-note"></div><article class="panel table-panel"><div class="panel-heading"><h2 data-t="逐日结果"></h2><span id="result-range" class="small-tag"></span></div><div id="result-table" class="table-wrap"></div><div class="pagination"><button id="prev-page" class="button" data-t="上一页"></button><button id="next-page" class="button" data-t="下一页"></button></div></article></div>
+      </section>
+      <section id="page-guide" class="page" hidden><div class="page-heading"><div><p class="eyebrow" data-t="使用说明">使用说明</p><h1 data-t="从文件包到第一份结果"></h1></div></div><article class="panel guide-panel"><h2 data-t="启动网页主界面"></h2><ol><li data-t="完整解压 ZIP，双击 Start_Web.cmd，浏览器会自动打开主界面。"></li><li data-t="需要 Python 3.10 或以上；网页计算入口只使用标准库，无需安装 Streamlit。"></li><li data-t="index.html 可直接打开编辑、预览与导出配置；正式计算请使用 Start_Web.cmd 打开的页面。"></li><li data-t="计算期间保留启动窗口；关闭窗口将结束本地服务。"></li></ol><h2 data-t="配置、导入、计算"></h2><p data-t="选中一个层后设置其适用参数；通过上下箭头调整顺序。保存参数和模型设置，再导入逐日降水。缺日、重复日期、非有限值与非法范围会被拒绝。"></p><p data-t="网页支持 CSV / TSV 和粘贴 CSV；Excel 可另存为 CSV，或使用保留的 Streamlit 界面导入 XLSX。"></p><h2 data-t="公式与适用范围"></h2><p data-t="运行使用随包 Python 核心，包含可选逐日 CN、Modified Penman PET、稳态侧排与 Giroud 接触缺陷公式。该程序是独立近似模型，尚未完成官方 EPA HELP 输出或实测资料验证。"></p><p data-t="示例剖面与气象均为合成演示输入。水量守恒说明计算账目闭合，不代表预测已通过验证。"></p><div class="guide-links"><a href="docs/V22_METHODS.md" data-t="公式实现说明"></a><a id="readme-link" href="README.md" data-t="完整说明书"></a><a href="examples/config.schema.json" download>JSON Schema ↗</a><a href="docs/TEST_REPORT.md" data-t="计算核心测试报告"></a></div></article></section>
+      <footer><span>HELP <b>2.3.1</b></span><span data-t="配置保存在本机浏览器；可随时导出 JSON 留存。"></span></footer>
+    </div>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,447 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "HELP-inspired profile v2",
+  "description": "Also run Python validation for finite numbers, WP < FC < porosity, theta <= porosity, unique IDs, and recirculation references.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": 2,
+      "type": "integer"
+    },
+    "site_name": {
+      "type": "string"
+    },
+    "layers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "oneOf": [
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "ksat_mm_day": {
+                "type": "number",
+                "minimum": 0
+              },
+              "initial_theta": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "wilting_point": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "porosity": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "thickness_mm": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "brooks_corey_lambda": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "field_capacity": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kind": {
+                "const": "soil"
+              }
+            },
+            "required": [
+              "field_capacity",
+              "id",
+              "initial_theta",
+              "kind",
+              "ksat_mm_day",
+              "porosity",
+              "thickness_mm",
+              "wilting_point"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "ksat_mm_day": {
+                "type": "number",
+                "minimum": 0
+              },
+              "initial_theta": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "wilting_point": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "porosity": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "thickness_mm": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "brooks_corey_lambda": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "field_capacity": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kind": {
+                "const": "waste"
+              }
+            },
+            "required": [
+              "field_capacity",
+              "id",
+              "initial_theta",
+              "kind",
+              "ksat_mm_day",
+              "porosity",
+              "thickness_mm",
+              "wilting_point"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "slope_fraction": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "ksat_mm_day": {
+                "type": "number",
+                "minimum": 0
+              },
+              "initial_theta": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "wilting_point": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "porosity": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "thickness_mm": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "brooks_corey_lambda": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "drainage_length_m": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "field_capacity": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "lateral_ksat_mm_day": {
+                "type": "number",
+                "minimum": 0
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kind": {
+                "const": "drainage"
+              }
+            },
+            "required": [
+              "drainage_length_m",
+              "field_capacity",
+              "id",
+              "initial_theta",
+              "kind",
+              "ksat_mm_day",
+              "lateral_ksat_mm_day",
+              "porosity",
+              "slope_fraction",
+              "thickness_mm",
+              "wilting_point"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "ksat_mm_day": {
+                "type": "number",
+                "minimum": 0
+              },
+              "initial_theta": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "wilting_point": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "porosity": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "thickness_mm": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "brooks_corey_lambda": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "field_capacity": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kind": {
+                "const": "barrier"
+              }
+            },
+            "required": [
+              "field_capacity",
+              "id",
+              "initial_theta",
+              "kind",
+              "ksat_mm_day",
+              "porosity",
+              "thickness_mm",
+              "wilting_point"
+            ]
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "leakage_multiplier": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "ksat_mm_day": {
+                "type": "number",
+                "minimum": 0
+              },
+              "thickness_mm": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "id": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "kind": {
+                "const": "geomembrane"
+              },
+              "leakage_model": {
+                "enum": [
+                  "empirical",
+                  "giroud_good",
+                  "giroud_poor"
+                ]
+              },
+              "pinhole_density_ha": {
+                "type": "number",
+                "minimum": 0
+              },
+              "pinhole_area_mm2": {
+                "type": "number",
+                "minimum": 0
+              },
+              "defect_density_ha": {
+                "type": "number",
+                "minimum": 0
+              },
+              "defect_area_mm2": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "ksat_mm_day",
+              "leakage_multiplier",
+              "thickness_mm"
+            ]
+          }
+        ]
+      }
+    },
+    "area_m2": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "curve_number": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "exclusiveMaximum": 100
+    },
+    "substeps_per_day": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1440
+    },
+    "root_depth_mm": {
+      "type": "number",
+      "minimum": 0
+    },
+    "snow_temperature_c": {
+      "type": "number"
+    },
+    "melt_temperature_c": {
+      "type": "number"
+    },
+    "degree_day_melt_mm_per_c_day": {
+      "type": "number",
+      "minimum": 0
+    },
+    "snow_sublimation_pet_fraction": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "recirculation_fraction": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "recirculation_target_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "runoff_method": {
+      "enum": [
+        "fixed",
+        "help_user",
+        "help_slope",
+        "help_vegetation"
+      ]
+    },
+    "pet_method": {
+      "enum": [
+        "provided",
+        "modified_penman"
+      ]
+    },
+    "lateral_method": {
+      "enum": [
+        "darcy",
+        "help_steady"
+      ]
+    },
+    "vegetation_class": {
+      "enum": [
+        "bare",
+        "poor",
+        "fair",
+        "good",
+        "excellent"
+      ]
+    },
+    "et_extraction": {
+      "enum": [
+        "legacy",
+        "lai_partition"
+      ]
+    },
+    "surface_slope_fraction": {
+      "type": "number"
+    },
+    "surface_length_m": {
+      "type": "number"
+    },
+    "infiltration_index": {
+      "type": "number"
+    },
+    "latitude_deg": {
+      "type": "number"
+    },
+    "max_lai": {
+      "type": "number"
+    },
+    "evaporation_depth_mm": {
+      "type": "number"
+    },
+    "growing_start_day": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 366
+    },
+    "growing_end_day": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 366
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "layers"
+  ]
+}

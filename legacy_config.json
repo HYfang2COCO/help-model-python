@@ -1,0 +1,18 @@
+{
+  "site_name": "Synthetic landfill with cover, waste, drain and composite-liner surrogate",
+  "curve_number": 78,
+  "substeps_per_day": 4,
+  "root_depth_mm": 500,
+  "snow_temperature_c": 0,
+  "melt_temperature_c": 0,
+  "degree_day_melt_mm_per_c_day": 3,
+  "snow_sublimation_pet_fraction": 0.15,
+  "recirculation_fraction": 0.0,
+  "recirculation_target_index": 1,
+  "layers": [
+    {"name": "cover", "kind": "soil", "thickness_mm": 600, "porosity": 0.46, "field_capacity": 0.26, "wilting_point": 0.10, "initial_theta": 0.30, "ksat_mm_day": 75, "brooks_corey_lambda": 0.55},
+    {"name": "waste", "kind": "waste", "thickness_mm": 2000, "porosity": 0.50, "field_capacity": 0.20, "wilting_point": 0.07, "initial_theta": 0.28, "ksat_mm_day": 65, "brooks_corey_lambda": 0.7},
+    {"name": "drain", "kind": "drain", "thickness_mm": 300, "porosity": 0.38, "field_capacity": 0.06, "wilting_point": 0.02, "initial_theta": 0.12, "ksat_mm_day": 2000, "brooks_corey_lambda": 0.8, "lateral_ksat_mm_day": 40000, "slope_fraction": 0.03, "drainage_length_m": 30}
+  ],
+  "liner": {"thickness_mm": 600, "ksat_mm_day": 0.02, "geomembrane_leakage_multiplier": 0.1}
+}

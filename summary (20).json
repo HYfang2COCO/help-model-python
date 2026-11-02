@@ -1,0 +1,23 @@
+{
+  "version": "2.3.1",
+  "days": 731,
+  "initial_storage_mm": 1232.0,
+  "final_storage_mm": 1287.2246776270945,
+  "precip_mm": 2227.2019999999998,
+  "runoff_mm": 84.25488060866999,
+  "evapotranspiration_mm": 1619.6401681358275,
+  "leachate_collected_mm": 467.97891729411265,
+  "bottom_leakage_mm": 0.10335633428766755,
+  "final_pending_recirculation_mm": 0.0,
+  "maximum_absolute_daily_balance_error_mm": 9.094947017729282e-13,
+  "maximum_absolute_layer_balance_error_mm": 7.105427357601002e-13,
+  "profile_warnings": [],
+  "warning": "独立近似研究模型；不是 EPA HELP，尚未对官方 HELP 或实测数据验证。",
+  "cumulative_balance_error_mm": 7.73070496506989e-12,
+  "area_m2": 10000.0,
+  "precip_m3": 22272.019999999997,
+  "runoff_m3": 842.5488060867,
+  "evapotranspiration_m3": 16196.401681358275,
+  "leachate_collected_m3": 4679.789172941127,
+  "bottom_leakage_m3": 1.0335633428766755
+}
